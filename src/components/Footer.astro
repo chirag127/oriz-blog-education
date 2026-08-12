@@ -1,116 +1,95 @@
 ---
 /*
- * blog-app Footer — "Signal Press" editorial surface.
+ * Footer — thin institutional COURSE COLOPHON (syllabus archetype).
  *
- * Signature element: a serif pull-quote (Source Serif 4) with a signal-orange
- * quote mark — the only place the footer raises its voice. Everything else
- * stays library-quiet: mono column headings, mono tag links, hairline rules.
- *
- * Reads palette + type from the editorial tokens (tokens.css / global.css).
+ * Not the sibling 4-column card footer. One low strip: a course-info line
+ * (instructor / license / feed) over a single ruled row of jump links, echoing
+ * the syllabus footer of a printed course handout.
  */
 import LegalFooter from '~/components/chrome/legal/LegalFooter.astro'
-import {
-  getCategoriesWithCounts,
-  getTagsWithCounts,
-  slugifyTag,
-} from '~/lib/blog'
+import { getSeriesWithCounts, slugifyTag } from '~/lib/blog'
 
-const categories = [
-  { name: 'All categories', slug: '' },
-  ...(await getCategoriesWithCounts()).slice(0, 6).map(({ category }) => ({
-    name: category,
-    slug: slugifyTag(category),
-  })),
-]
-const tags = (await getTagsWithCounts()).slice(0, 8).map(({ tag }) => tag)
+const units = (await getSeriesWithCounts()).slice(0, 6)
 ---
-<footer class="blog-footer" role="contentinfo">
-  <div class="bf-quote">
-    <blockquote>
-      <span aria-hidden="true" class="bf-q-mark">“</span>
-      The notes in the margin are the ones you keep.
-    </blockquote>
-    <p class="bf-quote-attr">— the margin · a study log</p>
+<footer class="course-colophon" role="contentinfo">
+  <div class="cc-wrap">
+    <p class="cc-line">
+      <span class="cc-code">EDU · THE MARGIN</span>
+      <span class="cc-dim">a self-taught learning course, kept as working notes by</span>
+      <a href="https://oriz.in/about/">Chirag Singhal</a>
+    </p>
+
+    <nav class="cc-nav" aria-label="Course units">
+      <span class="cc-nav-label">Jump to unit</span>
+      {units.map((u, i) => (
+        <>
+          {i > 0 && <span class="cc-sep" aria-hidden="true">/</span>}
+          <a href={`/series/${slugifyTag(u.series)}/`}>{u.series}</a>
+        </>
+      ))}
+    </nav>
+
+    <p class="cc-mantra">The notes in the margin are the ones you keep.</p>
   </div>
-  <div class="bf-grid">
-    <div class="bf-col">
-      <h3 class="bf-h">Categories</h3>
-      <ul>
-        {categories.map((c) => <li><a href={c.slug ? `/categories/${c.slug}/` : '/categories/'}>{c.name}</a></li>)}
-      </ul>
-    </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Recent</h3>
-      <ul>
-        <li><a href="/blog/">Latest posts</a></li>
-        <li><a href="/archive/">Archive</a></li>
-        <li><a href="/archive/">All posts</a></li>
-        <li><a href="/now/">Now</a></li>
-      </ul>
-    </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Tags</h3>
-      <ul class="bf-tags">
-        {tags.map((t) => <li><a href={`/tags/${slugifyTag(t)}/`}>#{t}</a></li>)}
-      </ul>
-    </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Series</h3>
-      <ul>
-        <li><a href="/series/">Browse series</a></li>
-        <li><a href="/blog/">Latest threads</a></li>
-      </ul>
-    </div>
-  </div>
+
   <LegalFooter
     github="https://github.com/chirag127/oriz-blog-education"
     appName="The Margin"
-    bio="A working notebook on how to learn — study methods, learning to code, and free resources — by Chirag Singhal."
+    bio="A self-taught learning course, kept as working notes — study methods, learning to code, and free resources — by Chirag Singhal."
     rss="/rss.xml"
   />
 </footer>
 <style>
-  .blog-footer {
-    margin-top: 5rem;
-    background: var(--color-paper-2, var(--paper-2, transparent));
-    color: var(--color-ink, var(--ink));
-    border-top: 1px solid var(--color-rule, var(--rule));
+  .course-colophon {
+    margin-top: 4rem;
+    background: var(--paper-2);
+    color: var(--ink);
+    border-top: 2px solid var(--rule-strong);
   }
-  .bf-quote {
-    max-width: 1200px; margin: 0 auto;
-    padding: 48px 16px 24px;
-    text-align: left;
-  }
-  .bf-quote blockquote {
+  .cc-wrap { max-width: var(--container-page, 1100px); margin: 0 auto; padding: 32px clamp(1rem, 3vw, 1.75rem) 16px; }
+  .cc-line {
     margin: 0;
-    font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
-    font-style: normal; font-weight: 600; font-size: clamp(22px, 3.2vw, 30px);
-    line-height: 1.3; letter-spacing: -0.015em;
-    color: var(--color-ink, var(--ink)); max-width: 560px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
   }
-  .bf-q-mark { font-size: 1.5em; line-height: 0; color: var(--color-accent, var(--cobalt, #e63a1f)); margin-right: 4px; }
-  .bf-quote-attr {
-    margin: 16px 0 0; font-family: var(--font-mono, ui-monospace);
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em;
-    color: var(--color-ink-mute, var(--ink-mute));
+  .cc-code { color: var(--accent); font-weight: 700; letter-spacing: 0.12em; }
+  .cc-dim { color: var(--ink-mute); }
+  .cc-line a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--highlighter-wash); }
+  .cc-line a:hover { color: var(--accent); }
+
+  .cc-nav {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-family: var(--font-sans, system-ui, sans-serif);
+    font-size: 13.5px;
   }
-  .bf-grid {
-    max-width: 1200px; margin: 0 auto;
-    display: grid; grid-template-columns: 1fr; gap: 24px;
-    padding: 12px 16px 24px;
+  .cc-nav-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-mute);
+    margin-right: 0.25rem;
   }
-  .bf-h {
-    margin: 0 0 14px;
-    font-family: var(--font-mono, ui-monospace);
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em;
-    color: var(--color-ink-mute, var(--ink-mute)); font-weight: 500;
+  .cc-nav a { color: var(--ink); text-decoration: none; }
+  .cc-nav a:hover { color: var(--accent); }
+  .cc-sep { color: var(--rule-strong); }
+
+  .cc-mantra {
+    margin: 1.25rem 0 0;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(15px, 2vw, 18px);
+    color: var(--ink-mute);
   }
-  .bf-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-  .bf-col a { color: var(--color-ink, var(--ink)); font-size: 14px; text-decoration: none; }
-  .bf-col a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  .bf-tags { flex-direction: row; flex-wrap: wrap; gap: 8px 12px; }
-  .bf-tags a { font-family: var(--font-mono, ui-monospace); font-size: 13px; color: var(--color-ink-mute, var(--ink-mute)); }
-  .bf-tags a:hover { color: var(--color-accent, var(--cobalt, #e63a1f)); text-decoration: none; }
-  @media (min-width: 768px) { .bf-grid { grid-template-columns: 1fr 1fr; gap: 32px; padding: 16px 24px 28px; } .bf-quote { padding: 64px 24px 20px; } }
-  @media (min-width: 1024px) { .bf-grid { grid-template-columns: repeat(4, 1fr); padding: 16px 24px 32px; } }
 </style>

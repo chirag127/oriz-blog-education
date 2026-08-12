@@ -35,7 +35,7 @@ interface Props {
 }
 
 const {
-  title = 'The Margin — a study log',
+  title = 'The Margin — a self-taught learning course',
   description = 'A working notebook on how to learn — study methods that stick, learning to code the honest way, and the best free resources. By Chirag Singhal.',
   canonical = `https://education-blog.oriz.in${Astro.url.pathname}`,
   noindex = false,
@@ -70,7 +70,7 @@ const visibleBottomBarActions = hideSidebar
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content={type} />
-    <meta property="og:site_name" content="The Margin" />
+    <meta property="og:site_name" content="The Margin — a learning course" />
     {ogImage && <meta property="og:image" content={ogImage} />}
     {type === 'article' && pubDate && (
       <meta property="article:published_time" content={pubDate.toISOString()} />
@@ -143,8 +143,10 @@ const visibleBottomBarActions = hideSidebar
     <a href="#main" class="skip-link">Skip to content</a>
     <Header />
     <div class="layout-body">
-      {!hideSidebar && <Sidebar><AppSidebarContent /></Sidebar>}
-      <main id="main"><slot /></main>
+      {!hideSidebar && (
+        <Sidebar width="272px"><AppSidebarContent /></Sidebar>
+      )}
+      <main id="main" class:list={[!hideSidebar && 'has-outline']}><slot /></main>
     </div>
     <Footer />
     <BottomBar actions={visibleBottomBarActions} />
@@ -161,9 +163,15 @@ const visibleBottomBarActions = hideSidebar
 </html>
 
 <style>
-  .layout-body { display: flex; gap: 0; align-items: flex-start; }
+  .layout-body { display: flex; gap: 0; align-items: flex-start; max-width: var(--container-page, 1100px); margin-inline: auto; }
   .layout-body > main { flex: 1 1 auto; min-width: 0; }
+  /* reading pane sits to the right of the syllabus outline, with a ruled gutter */
+  .layout-body > main.has-outline {
+    border-left: 1px solid var(--rule);
+    padding-left: clamp(1.25rem, 3vw, 2.5rem);
+  }
   @media (max-width: 767px) {
     .layout-body { display: block; }
+    .layout-body > main.has-outline { border-left: 0; padding-left: 0; }
   }
 </style>

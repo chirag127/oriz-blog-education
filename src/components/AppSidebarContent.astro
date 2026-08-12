@@ -1,61 +1,180 @@
 ---
 /*
- * AppSidebarContent — per-app sidebar slot for oriz-blog.
+ * SyllabusOutline — the primary navigation of the course (syllabus archetype).
  *
- * Categories link to /blog/category/<slug>/ if present (otherwise fall back to /blog/).
- * Recent posts: latest 5 entries from src/content/blog by pubDate desc.
+ * An indented course table-of-contents rendered down the left column:
+ *   UNIT 01  Learning to learn            ── series with parts
+ *     01 · Lesson title
+ *     02 · Lesson title
+ *   UNIT 02  ...
+ *   ── standalone notes listed as an appendix unit.
+ *
+ * Replaces the sibling "Categories / Recent" sidebar. Order carries meaning:
+ * unit numbers are the real reading sequence, so numbered markers are earned.
  */
-import { getCollection } from 'astro:content'
-import { getCategoriesWithCounts, slugifyTag } from '~/lib/blog'
+import { getPostsInSeries, getPublishedPosts, getSeriesWithCounts, slugifyTag } from '~/lib/blog'
 
-const categories = [
-  { label: 'All categories', href: '/categories/' },
-  ...(await getCategoriesWithCounts()).slice(0, 6).map(({ category }) => ({
-    label: category,
-    href: `/categories/${slugifyTag(category)}/`,
-  })),
-]
-
-let recent: { slug: string; title: string }[] = []
-try {
-  const all = await getCollection('blog')
-  recent = all
-    .filter((p) => !p.data?.draft)
-    .sort((a, b) => {
-      const ad = a.data?.pubDate ? new Date(a.data.pubDate).getTime() : 0
-      const bd = b.data?.pubDate ? new Date(b.data.pubDate).getTime() : 0
-      return bd - ad
-    })
-    .slice(0, 5)
-    .map((p) => ({ slug: p.id, title: p.data?.title ?? p.id }))
-} catch {
-  recent = []
+const seriesAll = await getSeriesWithCounts()
+const units: { n: string; name: string; slug: string; lessons: { title: string; slug: string }[] }[] = []
+let idx = 0
+for (const { series } of seriesAll) {
+  idx += 1
+  const parts = await getPostsInSeries(series)
+  units.push({
+    n: String(idx).padStart(2, '0'),
+    name: series,
+    slug: slugifyTag(series),
+    lessons: parts.slice(0, 6).map((p) => ({ title: p.data.title, slug: p.id })),
+  })
 }
----
-<div class="sb-section">
-  <h3 class="sb-h">Categories</h3>
-  <ul class="sb-list">
-    {categories.map((c) => (
-      <li><a href={c.href}>{c.label}</a></li>
-    ))}
-  </ul>
-</div>
 
-{recent.length > 0 && (
-  <div class="sb-section">
-    <h3 class="sb-h">Recent</h3>
-    <ul class="sb-list">
-      {recent.map((p) => (
-        <li><a href={`/blog/${p.slug}/`}>{p.title}</a></li>
-      ))}
-    </ul>
-  </div>
-)}
+// Appendix: recent standalone notes not folded into a numbered unit.
+const inSeries = new Set(
+  (await Promise.all(seriesAll.map((s) => getPostsInSeries(s.series))))
+    .flat()
+    .map((p) => p.id),
+)
+const loose = (await getPublishedPosts()).filter((p) => !inSeries.has(p.id)).slice(0, 6)
+
+const cur = Astro.url.pathname
+---
+<nav class="syllabus" aria-label="Course outline">
+  <p class="syl-eyebrow">Course outline</p>
+
+  <ol class="syl-units">
+    {units.map((u) => {
+      const active = cur.startsWith(`/series/${u.slug}`)
+      return (
+        <li class:list={['syl-unit', active && 'is-active']}>
+          <a class="syl-unit-head" href={`/series/${u.slug}/`} aria-current={active ? 'page' : undefined}>
+            <span class="syl-unit-n">Unit {u.n}</span>
+            <span class="syl-unit-name">{u.name}</span>
+          </a>
+          {u.lessons.length > 0 && (
+            <ol class="syl-lessons">
+              {u.lessons.map((l, i) => (
+                <li class="syl-lesson">
+                  <a href={`/blog/${l.slug}/`}>
+                    <span class="syl-lesson-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                    <span class="syl-lesson-t">{l.title}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          )}
+        </li>
+      )
+    })}
+
+    {loose.length > 0 && (
+      <li class="syl-unit syl-unit--appendix">
+        <a class="syl-unit-head" href="/archive/">
+          <span class="syl-unit-n">Appendix</span>
+          <span class="syl-unit-name">Loose notes</span>
+        </a>
+        <ol class="syl-lessons">
+          {loose.map((p, i) => (
+            <li class="syl-lesson">
+              <a href={`/blog/${p.id}/`}>
+                <span class="syl-lesson-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                <span class="syl-lesson-t">{p.data.title}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </li>
+    )}
+  </ol>
+
+  <p class="syl-foot">
+    <a href="/archive/">All notes</a>
+    <span aria-hidden="true">·</span>
+    <a href="/tags/">Index</a>
+    <span aria-hidden="true">·</span>
+    <a href="/about/">About the course</a>
+  </p>
+</nav>
 
 <style>
-  .sb-section { margin-bottom: 1.25rem; }
-  .sb-h { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute, #526671); margin: 0 0 0.5rem; }
-  .sb-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.25rem; }
-  .sb-list a { color: var(--ink, inherit); text-decoration: none; font-size: 0.875rem; }
-  .sb-list a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  .syllabus { font-family: var(--font-sans, system-ui, sans-serif); }
+  .syl-eyebrow {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .syl-units { list-style: none; margin: 0; padding: 0; counter-reset: none; }
+  .syl-unit { margin-bottom: 1.1rem; }
+  .syl-unit-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem;
+    align-items: baseline;
+    text-decoration: none;
+    padding-left: 0.6rem;
+    border-left: 2px solid transparent;
+  }
+  .syl-unit.is-active .syl-unit-head { border-left-color: var(--accent); }
+  .syl-unit-n {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--marker);
+    white-space: nowrap;
+  }
+  .syl-unit-name {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .syl-unit-head:hover .syl-unit-name { color: var(--accent); }
+  .syl-lessons {
+    list-style: none;
+    margin: 0.4rem 0 0;
+    padding: 0 0 0 1.6rem;
+  }
+  .syl-lesson a {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    gap: 0.4rem;
+    align-items: baseline;
+    padding: 2px 0;
+    text-decoration: none;
+    color: var(--ink-mute);
+  }
+  .syl-lesson-n {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--rule-strong);
+  }
+  .syl-lesson-t {
+    font-size: 12.5px;
+    line-height: 1.35;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+  }
+  .syl-lesson a:hover .syl-lesson-t { color: var(--accent); text-decoration-color: var(--highlighter-wash); }
+  .syl-lesson a:hover .syl-lesson-n { color: var(--accent); }
+  .syl-foot {
+    margin: 1.5rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--rule-strong);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .syl-foot a { color: var(--ink-mute); text-decoration: none; }
+  .syl-foot a:hover { color: var(--accent); }
 </style>
