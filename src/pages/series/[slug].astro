@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
+import StudyProgressMeter from '~/components/StudyProgressMeter.astro'
 import BaseLayout from '~/layouts/BaseLayout.astro'
 
 /**
@@ -94,6 +95,11 @@ function fmtDate(d: Date): string {
       <p class="lede">{seriesDescription}</p>
       <p class="stats">{sortedParts.length} part{sortedParts.length !== 1 ? 's' : ''}</p>
       {sortedParts.length > 0 && (
+        <div class="progress-wrap">
+          <StudyProgressMeter current={sortedParts.length} total={sortedParts.length} unitName={seriesTitle} />
+        </div>
+      )}
+      {sortedParts.length > 0 && (
         <a href={`/blog/${sortedParts[0].id}`} class="btn btn-primary">Start with part 1 →</a>
       )}
     </header>
@@ -131,6 +137,7 @@ function fmtDate(d: Date): string {
 
 <style>
   .page { padding-block: 2.5rem 4rem; }
+  .progress-wrap { margin: 1rem 0 1.5rem; max-width: 480px; }
   .crumbs { margin-bottom: 1rem; }
   .crumbs a { color: var(--color-fg-muted); font-size: 0.875rem; text-decoration: none; }
   .crumbs a:hover { color: var(--color-fg); }

@@ -1,0 +1,160 @@
+---
+/**
+ * StudyProgressMeter — signature component for education-blog.oriz.in only.
+ *
+ * A graph-ruled "notebook margin" progress bar that renders the learner's
+ * position inside a unit (series). Looks like a ruled index card slipped
+ * inside the margin of a textbook: faint grid lines, a goldenrod-highlighter
+ * fill that sweeps left-to-right, and a red-pen annotation showing
+ * "lesson N of total · % done".
+ *
+ * Usage:
+ *   <StudyProgressMeter current={2} total={5} unitName="Learning to learn" />
+ *
+ * No-JS: the fill is rendered as an inline width so it works in SSR/static.
+ * Reduced-motion: animation disabled; fill is instant.
+ */
+
+interface Props {
+  current: number
+  total: number
+  unitName?: string
+  compact?: boolean
+}
+
+const { current, total, unitName, compact = false } = Astro.props
+const pct = total > 0 ? Math.round((current / total) * 100) : 0
+const widthStr = `${pct}%`
+const label = `Lesson ${current} of ${total}${unitName ? ` — ${unitName}` : ''} · ${pct}% complete`
+---
+
+<div
+  class:list={['spm', compact && 'spm--compact']}
+  role="meter"
+  aria-valuenow={current}
+  aria-valuemin={0}
+  aria-valuemax={total}
+  aria-label={label}
+>
+  <div class="spm-graph" aria-hidden="true">
+    <div class="spm-fill" style={`width: ${widthStr}`}></div>
+    {!compact && Array.from({ length: total - 1 }).map((_, i) => (
+      <span
+        class:list={['spm-tick', i < current - 1 && 'spm-tick--done']}
+        style={`left: ${Math.round(((i + 1) / total) * 100)}%`}
+      ></span>
+    ))}
+  </div>
+  {!compact && (
+    <p class="spm-label" aria-hidden="true">
+      <span class="spm-pos">
+        <span class="spm-marker" aria-hidden="true"></span>
+        {current}/{total}
+      </span>
+      {unitName && <span class="spm-unit">{unitName}</span>}
+      <span class="spm-pct">{pct}%</span>
+    </p>
+  )}
+</div>
+
+<style>
+  .spm {
+    --spm-h: 20px;
+    --spm-fill: var(--highlighter, #e8b93b);
+    --spm-fill-wash: var(--highlighter-wash, color-mix(in oklab, #e8b93b 42%, transparent));
+    --spm-grid: var(--graph, #c3cdc6);
+    --spm-grid-major: var(--graph-major, #b0bcb4);
+    --spm-marker: var(--marker, #c64a3b);
+    --spm-ink: var(--ink-mute, #5c6b64);
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    width: 100%;
+  }
+  .spm--compact { --spm-h: 10px; }
+
+  /* graph-ruled ruled bar */
+  .spm-graph {
+    position: relative;
+    height: var(--spm-h);
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--spm-grid) 0 1px,
+        transparent 1px 20px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        var(--spm-grid-major) 0 1px,
+        transparent 1px var(--spm-h)
+      ),
+      var(--paper-2, #efece1);
+    overflow: hidden;
+    border-radius: 1px;
+  }
+
+  /* goldenrod highlighter fill */
+  .spm-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--spm-fill-wash);
+    border-right: 2px solid var(--spm-fill);
+    min-width: 4px;
+    transition: width var(--dur-slow, 420ms) var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) 80ms;
+  }
+  @media (prefers-reduced-motion: reduce) { .spm-fill { transition: none; } }
+
+  /* lesson-boundary ticks */
+  .spm-tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--paper-2, #efece1);
+    transform: translateX(-50%);
+    opacity: 0.6;
+  }
+  .spm-tick--done { background: color-mix(in oklab, var(--spm-fill) 30%, var(--paper-2, #efece1)); }
+
+  /* annotation strip */
+  .spm-label {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 0.75rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--spm-ink);
+  }
+  .spm-pos {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--spm-marker);
+    font-weight: 600;
+  }
+  /* tiny red-pen dash — the margin annotation mark */
+  .spm-marker {
+    display: inline-block;
+    width: 10px;
+    height: 2px;
+    background: var(--spm-marker);
+    flex-shrink: 0;
+    transform: rotate(-8deg);
+    border-radius: 1px;
+  }
+  .spm-unit {
+    flex: 1;
+    color: var(--spm-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .spm-pct {
+    margin-left: auto;
+    color: color-mix(in oklab, var(--spm-fill) 80%, var(--spm-ink));
+    font-weight: 600;
+  }
+</style>
