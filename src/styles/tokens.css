@@ -1,0 +1,258 @@
+/*
+ * tokens.css — "The Margin" study-notebook identity for education-blog.oriz.in.
+ *
+ * Niche: Education & Learning. Grounded in the physical world of studying —
+ * the graph-ruled composition notebook, the chalkboard, the highlighter, the
+ * teacher's red pen in the margin. Deliberately NOT the oriz-blog "Signal
+ * Press" amber/serif look, and NOT any of the three AI-default looks:
+ *   - not cream #F4F1EA + generic-serif + terracotta (this paper is a COOLER
+ *     green-white; accent is a real goldenrod HIGHLIGHTER, not terracotta;
+ *     display is Fraunces, not Georgia/Times)
+ *   - not near-black + acid-green/vermilion
+ *   - not zero-radius broadsheet hairline newspaper columns
+ *
+ * Palette (named):
+ *   --chalk   #F5F3EC  warm green-white paper (light bg)
+ *   --slate   #16302B  deep pine-slate chalkboard (dark surface / display ink)
+ *   --ink     #1B2A27  near-slate reading text on light
+ *   --highlighter #E8B93B  goldenrod highlighter — the signal accent
+ *   --marker  #C64A3B  muted teacher's-red pen — sparing secondary
+ *   --graph   #BFC9C4  faint blue-green graph-paper rule
+ *
+ * Every --color-* / shell alias is preserved so chrome/legal/Footer compile
+ * unchanged. Theme modes: light default · dark chalkboard · sepia · hc.
+ */
+:root {
+  color-scheme: light;
+
+  /* ── notebook-paper palette (light default) ─────────────────────────── */
+  --brand: #b8860f; /* goldenrod highlighter, ink-weight — links, active */
+  --brand-soft: #f6ecc8; /* pale highlighter wash — hover, chips */
+  --success: #2e7d5b;
+  --danger-color: #c64a3b; /* teacher's red pen */
+
+  --paper: #f5f3ec; /* warm green-white composition paper */
+  --paper-2: #efece1; /* elevated leaf / panel */
+  --surface: var(--paper-2);
+  --ink: #1b2a27; /* near-slate reading ink */
+  --ink-mute: #5c6b64; /* pencil grey */
+  --rule: #d6d3c4; /* faint paper hairline */
+  --rule-strong: #b7b3a1; /* heavier masthead rule */
+
+  /* signature highlighter — the translucent sweep used on the hero + hovers */
+  --highlighter: #e8b93b;
+  --highlighter-wash: color-mix(in oklab, #e8b93b 42%, transparent);
+  --marker: #c64a3b;
+  --graph: #c3cdc6; /* graph-paper grid line */
+  --graph-major: #b0bcb4; /* major grid line */
+
+  /* canonical accent routes through --accent */
+  --accent: var(--brand);
+  --accent-soft: var(--brand-soft);
+  --cobalt: var(--accent); /* back-compat alias */
+  --brand-tint: var(--brand-soft);
+  --sage: var(--success);
+  --vermilion: var(--danger-color);
+
+  /* content-vertical markers — desk colours (Dev/Finance/Culture/Health). On
+     this study blog the primary desk is Learning (→ dev). Kept distinct. */
+  --v-dev: #2e6f6a; /* learning — teal-slate */
+  --v-finance: #2e7d5b; /* method — study-green */
+  --v-culture: #9a5b9c; /* mindset — plum */
+  --v-health: #c07a2c; /* resources — ochre */
+  --v-personal: #5c6b64;
+
+  /* semantic passthroughs */
+  --color-bg: var(--paper);
+  --color-fg: var(--ink);
+  --color-accent: var(--brand);
+  --color-accent-fg: #f5f3ec;
+  --color-sage: var(--success);
+  --color-muted: var(--ink-mute);
+  --color-border: var(--rule);
+  --color-bg-soft: var(--paper-2);
+  --color-bg-muted: var(--paper-2);
+  --color-prose: var(--ink);
+  --color-fg-muted: var(--ink-mute);
+  --color-fg-soft: var(--ink-mute);
+
+  /* color alias layer (chrome components read these) */
+  --color-brand-indigo: var(--brand);
+  --color-brand-indigo-soft: var(--brand-soft);
+  --color-brand-success: var(--success);
+  --color-brand-danger: var(--danger-color);
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #efece1;
+  --color-neutral-100: #e7e3d5;
+  --color-neutral-200: #d6d3c4;
+  --color-neutral-300: #b7b3a1;
+  --color-neutral-500: #5c6b64;
+  --color-neutral-700: #33413c;
+  --color-neutral-900: #1b2a27;
+  --color-neutral-1000: #0f1e1b;
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-ink-mute: var(--ink-mute);
+  --color-rule: var(--rule);
+
+  /* ── type — families declared in global.css @theme ─────────────────── */
+
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 48px;
+
+  /* spacing — 8 steps */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* motion */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 420ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* breakpoints */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1440px;
+
+  /* radii — soft notebook-corner, small */
+  --radius-card: 4px;
+  --radius-button: 4px;
+  --container-page: 1100px;
+}
+
+/* ── DARK — chalkboard, system preference (unless forced light) ─────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='sepia']) {
+    color-scheme: dark;
+    --brand: #e8b93b; /* bright goldenrod chalk on the board */
+    --brand-soft: #2c2a18;
+    --success: #5fbf93;
+    --danger-color: #e8735f;
+
+    --paper: #0f1e1b; /* deep pine chalkboard */
+    --paper-2: #16302b;
+    --ink: #eef3ee; /* chalk white */
+    --ink-mute: #93a89f;
+    --rule: #274038;
+    --rule-strong: #35564b;
+
+    --highlighter: #e8b93b;
+    --highlighter-wash: color-mix(in oklab, #e8b93b 30%, transparent);
+    --marker: #e8735f;
+    --graph: #22382f;
+    --graph-major: #2c4638;
+
+    --v-dev: #58bdb2;
+    --v-finance: #5fbf93;
+    --v-culture: #c98fca;
+    --v-health: #e0a95a;
+    --v-personal: #93a89f;
+
+    --color-accent-fg: #0f1e1b;
+    --color-neutral-0: #0f1e1b;
+    --color-neutral-50: #16302b;
+    --color-neutral-100: #1c3a33;
+    --color-neutral-200: #274038;
+    --color-neutral-300: #35564b;
+    --color-neutral-500: #93a89f;
+    --color-neutral-700: #c6d3cc;
+    --color-neutral-900: #eef3ee;
+  }
+}
+
+/* ── DARK — explicit override, wins over system ─────────────────────── */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --brand: #e8b93b;
+  --brand-soft: #2c2a18;
+  --success: #5fbf93;
+  --danger-color: #e8735f;
+  --paper: #0f1e1b;
+  --paper-2: #16302b;
+  --ink: #eef3ee;
+  --ink-mute: #93a89f;
+  --rule: #274038;
+  --rule-strong: #35564b;
+  --highlighter: #e8b93b;
+  --highlighter-wash: color-mix(in oklab, #e8b93b 30%, transparent);
+  --marker: #e8735f;
+  --graph: #22382f;
+  --graph-major: #2c4638;
+  --v-dev: #58bdb2;
+  --v-finance: #5fbf93;
+  --v-culture: #c98fca;
+  --v-health: #e0a95a;
+  --v-personal: #93a89f;
+  --color-accent-fg: #0f1e1b;
+  --color-neutral-0: #0f1e1b;
+  --color-neutral-50: #16302b;
+  --color-neutral-100: #1c3a33;
+  --color-neutral-200: #274038;
+  --color-neutral-300: #35564b;
+  --color-neutral-500: #93a89f;
+  --color-neutral-700: #c6d3cc;
+  --color-neutral-900: #eef3ee;
+}
+
+/* ── SEPIA — aged textbook page ─────────────────────────────────────── */
+:root[data-theme='sepia'] {
+  color-scheme: light;
+  --brand: #a8720c;
+  --brand-soft: #f0e2c2;
+  --paper: #f3ead6;
+  --paper-2: #ece0c8;
+  --ink: #3a3324;
+  --ink-mute: #7a6e54;
+  --rule: #ddcfb2;
+  --graph: #dccfb0;
+  --graph-major: #cebf9c;
+  --color-accent-fg: #f3ead6;
+  --color-fg-soft: color-mix(in oklab, var(--ink) 55%, var(--paper));
+  --color-neutral-50: #ece0c8;
+  --color-neutral-100: #e3d5b9;
+  --color-neutral-200: #ddcfb2;
+  --color-neutral-500: #7a6e54;
+  --color-neutral-700: #574d38;
+  --color-neutral-900: #3a3324;
+}
+
+/* ── HIGH-CONTRAST — pure white ruled sheet, hard rules ─────────────── */
+:root[data-theme='hc'] {
+  color-scheme: light;
+  --brand: #8a5a00;
+  --brand-soft: #ffedb8;
+  --paper: #ffffff;
+  --paper-2: #ffffff;
+  --ink: #000000;
+  --ink-mute: #26302c;
+  --rule: #000000;
+  --graph: #000000;
+  --graph-major: #000000;
+  --highlighter-wash: color-mix(in oklab, #e8b93b 55%, transparent);
+  --color-accent-fg: #ffffff;
+  --color-fg-soft: #26302c;
+  --color-neutral-50: #ffffff;
+  --color-neutral-100: #ffffff;
+  --color-neutral-200: #000000;
+  --color-neutral-500: #26302c;
+  --color-neutral-700: #000000;
+  --color-neutral-900: #000000;
+}

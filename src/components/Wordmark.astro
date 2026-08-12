@@ -1,0 +1,125 @@
+---
+/*
+ * Wordmark — "the margin" set in Fraunces display serif with a goldenrod
+ * highlighter sweep dragged across the word "margin" — the signature mark of
+ * a study notebook. The sweep is the same physical highlighter used on the
+ * homepage hero thesis and on link hovers, so the brand mark and the reading
+ * gesture are one system.
+ *
+ * Props kept API-compatible with the shared chrome (subtitle/size/href/
+ * asHeading) so Header + FamilyChrome compile unchanged.
+ */
+
+interface Props {
+  /** Sub-section name — rendered after a `·` separator. */
+  subtitle?: string
+  /** Display size in CSS pixels (applies to the "margin" word). */
+  size?: number
+  /** Wrap the mark in an <a href="/"> — defaults to '/' when subtitle is set. */
+  href?: string | null
+  /** Render as <h1> (the masthead) rather than <div>. */
+  asHeading?: boolean
+}
+
+const { subtitle, size = 96, href = null, asHeading = false } = Astro.props
+const Tag = asHeading ? 'h1' : ('div' as const)
+const label = subtitle ? `The Margin · ${subtitle}` : 'The Margin'
+---
+
+{
+  href ? (
+    <a class="wordmark-link" href={href} aria-label={label}>
+      <Tag class="wordmark" style={`--wm-size: ${size}px;`}>
+        <span class="wm-the">the</span>
+        <span class="wm-word">
+          margin
+          <span class="wm-sweep" aria-hidden="true" />
+        </span>
+        {subtitle && (
+          <>
+            <span class="wordmark-sep" aria-hidden="true">·</span>
+            <span class="wordmark-sub">{subtitle}</span>
+          </>
+        )}
+      </Tag>
+    </a>
+  ) : (
+    <Tag class="wordmark" style={`--wm-size: ${size}px;`}>
+      <span class="wm-the">the</span>
+      <span class="wm-word">
+        margin
+        <span class="wm-sweep" aria-hidden="true" />
+      </span>
+      {subtitle && (
+        <>
+          <span class="wordmark-sep" aria-hidden="true">·</span>
+          <span class="wordmark-sub">{subtitle}</span>
+        </>
+      )}
+    </Tag>
+  )
+}
+
+<style>
+  .wordmark-link {
+    display: inline-block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.32em;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--wm-size, 96px);
+    line-height: 1;
+    color: var(--ink);
+  }
+  .wm-the {
+    font-family: var(--font-mono);
+    font-size: 0.42em;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    color: var(--ink-mute);
+    transform: translateY(-0.12em);
+  }
+  .wm-word {
+    position: relative;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variation-settings: 'SOFT' 0, 'WONK' 0, 'opsz' 40;
+    white-space: nowrap;
+    z-index: 0;
+  }
+  /* the highlighter sweep — a hand-dragged goldenrod band, sitting behind the
+     baseline third of the word, slightly rotated + overshooting like a real
+     marker. z-index keeps the glyphs readable on top. */
+  .wm-sweep {
+    position: absolute;
+    left: -0.04em;
+    right: -0.06em;
+    bottom: 0.06em;
+    height: 0.42em;
+    background: var(--highlighter-wash);
+    transform: rotate(-1.4deg);
+    z-index: -1;
+    border-radius: 1px 3px 2px 4px;
+  }
+  .wordmark-sep {
+    color: var(--rule-strong, var(--rule));
+    font-family: var(--font-mono);
+    font-size: 0.5em;
+    font-weight: 400;
+    transform: translateY(-0.1em);
+  }
+  .wordmark-sub {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.42em;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    transform: translateY(-0.12em);
+  }
+</style>
